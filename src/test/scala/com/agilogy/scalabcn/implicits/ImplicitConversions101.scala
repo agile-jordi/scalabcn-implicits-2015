@@ -2,6 +2,8 @@ package com.agilogy.scalabcn.implicits
 
 import org.scalatest.FlatSpec
 
+import scala.language.implicitConversions
+
 class ImplicitConversions101 extends FlatSpec{
 
   behavior of "implicit conversions"
