@@ -8,7 +8,7 @@ trait Comparator[T]{
 }
 
 object Comparator{
-  
+
   // int is of type Comparator
   implicit val intComparator = new Comparator[Int] {
     override def gt(a: Int, b: Int): Boolean = a > b
@@ -25,8 +25,12 @@ class TypeClasses101 extends FlatSpec {
   behavior of "type classes"
 
   // Polymorphism: max operates on things of the comparator type
-  def max[T](l:List[T], ifEmpty:T)(implicit comparator:Comparator[T]):T = if(l.isEmpty) ifEmpty else l.tail.fold(l.head){
-    case (acc,elem) => if(comparator.gt(acc,elem)) acc else elem
+  // Syntax sugar! Context bounds
+  def max[T:Comparator](l:List[T], ifEmpty:T):T = {
+    val comparator = implicitly[Comparator[T]]
+    if(l.isEmpty) ifEmpty else l.tail.fold(l.head){
+      case (acc,elem) => if(comparator.gt(acc,elem)) acc else elem
+    }
   }
 
   they should "provide polymorphism" in {
