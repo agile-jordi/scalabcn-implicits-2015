@@ -1,6 +1,8 @@
 package com.agilogy.scalabcn.implicits
 
-class IssueId(val id:Int) extends AnyVal
+case class IssueId(id:Int) extends AnyVal{
+  def isPriorTo(other:IssueId):Boolean = this.id < other.id
+}
 
 object IssueId{
   var nextId:Int = 0
