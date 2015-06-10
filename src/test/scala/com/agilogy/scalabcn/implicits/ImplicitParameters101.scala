@@ -11,29 +11,31 @@ class ImplicitParameters101 extends FlatSpec{
   // Let's say you have a codebase where you want to track who is making a request
   // throughout the call stack
 
-  def createIssue(description:String, caller:User):IssueId = {
-    db.save(Issue.newIssue(description,caller))
+  // But it makes sense to treat caller as a crosscutting parameter:
+
+  def createIssue(description:String)(caller:User):IssueId = {
+    db.save(Issue.newIssue(description)(caller))
   }
 
-  def getIssue(id:IssueId, caller:User): Option[Issue] = {
+  def getIssue(id:IssueId)(caller:User): Option[Issue] = {
     if(!caller.canViewIssues) throw new ForbiddenException
     val res = db.retrieve(id)
     if(res.exists(!_.viewAllowed(caller))) throw new ForbiddenException
     res
   }
   
-  def addComment(id: IssueId, comment:String, caller:User):Unit = {
-    val issue = getIssue(id,caller).getOrElse(throw new NotFoundException)
-    db.save(issue.addComment(comment,caller))
+  def addComment(id: IssueId, comment:String)(caller:User):Unit = {
+    val issue = getIssue(id)(caller).getOrElse(throw new NotFoundException)
+    db.save(issue.addComment(comment)(caller))
   }
 
   they should "work as expected" in {
     val user = User("agile_jordi")
     val desc = "no implicits here"
     val comment = "why are there no implicits in an implicit talk?"
-    val issueId = createIssue(desc,user)
-    addComment(issueId,comment,user)
-    val issue = getIssue(issueId,user).get
+    val issueId = createIssue(desc)(user)
+    addComment(issueId,comment)(user)
+    val issue = getIssue(issueId)(user).get
     assert(issue.description === desc)
     assert(issue.reporter === user)
     assert(issue.comments.size === 1)
